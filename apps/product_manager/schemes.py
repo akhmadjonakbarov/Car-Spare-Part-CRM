@@ -33,11 +33,11 @@ class UnitScheme(BaseModel):
     value: str
 
 
+class CarScheme(BaseModel):
+    name: str = Field(min_length=2)
+
+
 class CategoryScheme(BaseModel):
-    name: str = Field(min_length=4)
-
-
-class CompanyScheme(BaseModel):
     name: str = Field(min_length=4)
 
 

@@ -9,7 +9,7 @@ from apps.product_manager.routes import (
     store_routes,
     doc_item_routes,
     type_routes,
-    company_routes,
+    car_routes,
 )
 from apps.permissions import routes as permissions_routes
 from apps.action import routes as action_routes
@@ -34,7 +34,6 @@ main_router.include_router(document_routes.router)
 main_router.include_router(doc_item_routes.router)
 main_router.include_router(store_routes.router)
 main_router.include_router(category_routes.router)
-main_router.include_router(company_routes.router)
 main_router.include_router(unit_routes.router)
 main_router.include_router(type_routes.router)
 main_router.include_router(product_routes.router)
@@ -42,14 +41,4 @@ main_router.include_router(purchase_routes.router)
 main_router.include_router(currency_routes.router)
 main_router.include_router(statistics_routes.router)
 main_router.include_router(notes_routes.router)
-
-#  api version 2
-# computer_routes = APIRouter(
-#     prefix=settings.API_V2
-# )
-# computer_routes.include_router(ram.router)
-# computer_routes.include_router(rom.router)
-# computer_routes.include_router(display.router)
-# computer_routes.include_router(processor.router)
-# computer_routes.include_router(gen.router)
-# computer_routes.include_router(computer.router)
+main_router.include_router(car_routes.router)

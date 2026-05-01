@@ -5,6 +5,8 @@ from sqlalchemy import (
     Column, Integer, String,
     ForeignKey, Float, Numeric, Table
 )
+
+
 class Document(Base):
     __tablename__ = 'documents'
     SELL = 'sell'
@@ -41,7 +43,7 @@ class DocumentItem(BaseDocumentItem):
         'DocumentItemBalance', back_populates='document_item')
 
     def __str__(self):
-        return f'Name:{self.item} - Qty:{self.qty} - Doc-Type:{self.document.doc_type}'
+        return f"ID: {self.id} | Qty: {str(self.qty)}"
 
     @hybrid_property
     def total_cost(self):
@@ -74,4 +76,4 @@ class DocumentItemBalance(BaseDocumentItem):
         'DocumentItem', back_populates='document_item_balances')
 
     def __str__(self):
-        return f'Name:{self.item} - Qty:{self.qty} - Doc-Type:{self.document.doc_type}'
+        return f"ID: {self.id} | Qty: {str(self.qty)}"

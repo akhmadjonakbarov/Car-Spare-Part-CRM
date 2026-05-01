@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from .models import Item, Company, Category, Unit, Type, TypeItem
+from .models import Item, Category, Unit, Type, TypeItem, Car
 
 
 class ItemAdmin(ModelView, model=Item):
@@ -14,13 +14,6 @@ class ItemAdmin(ModelView, model=Item):
     column_searchable_list = [Item.name, Item.barcode]
     name = "Item"
     icon = "fa-solid fa-box"
-
-
-class CompanyAdmin(ModelView, model=Company):
-    column_list = [Company.id, Company.name]
-    column_searchable_list = [Company.name]
-    name = "Company"
-    icon = "fa-solid fa-building"
 
 
 class CategoryAdmin(ModelView, model=Category):
@@ -48,3 +41,10 @@ class TypeItemAdmin(ModelView, model=TypeItem):
     column_list = [TypeItem.type_id, TypeItem.item_id]
     name = "Type Item"
     icon = "fa-solid fa-link"
+
+
+class CarAdmin(ModelView, model=Car):
+    column_list = [Car.id, Car.name]
+    column_searchable_list = [Car.name]
+    name = "Car"
+    icon = "fa-solid fa-car"

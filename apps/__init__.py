@@ -1,8 +1,7 @@
 from .user.models import User
-from .computer.models import *
 from .role_manager.models import Role, Employee, SalaryType
 from .product_manager.models import (
-    Company, Category, Unit, Item, Type, TypeItem
+  Category, Unit, Item, Type, TypeItem
 )
 from .document.models import (
     Document,
@@ -22,12 +21,8 @@ __all__ = [
     "Initializer",
     "User", "Role", "Employee",
     "SalaryType", "Currency", "Document",
-    "DocumentItem", "DocumentItemBalance", "Company",
+    "DocumentItem", "DocumentItemBalance", 
     "Category", "Unit", "Permission",
     "Action", "Item", "Note", "Type", "TypeItem",
-    "Customer", "RamComputer", "Purchase",
-    "Ram", "Computer", "ComputerDisplay", "RomComputer", "Rom",
-    "Display", "RefreshRate", "DSize", "DisplayRefreshRate",
-    "DisplayDSize", "DisplayResolution", "Processor",
-    "ProcessorComputer", "Gen", "Resolution", "Transaction"
+    "Customer",  "Purchase", "Transaction"
 ]

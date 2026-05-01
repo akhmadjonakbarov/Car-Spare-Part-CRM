@@ -18,6 +18,10 @@ from utils.response_type import res_message
 # ------------------
 # Serializers / Schemas
 # ------------------
+class TypeSchemaRead(BaseModel):
+    id: int
+    name: str
+
 
 class TypeSerializer(Schema):
     id = fields.Int()
@@ -25,11 +29,11 @@ class TypeSerializer(Schema):
 
 
 class TypeCreateScheme(BaseModel):
-    name: constr(strip_whitespace=True, min_length=1, max_length=100)
+    name: str
 
 
 class TypeUpdateScheme(BaseModel):
-    name: Optional[constr(strip_whitespace=True, min_length=1, max_length=100)] = None
+    name: Optional[str] = None
 
 
 # ------------------
@@ -49,38 +53,17 @@ def serialize_type(obj: Type, include_count: bool = True):
     return TypeSerializer().dump(data)
 
 
-@router.get("/all")
+@router.get("", response_model=List[TypeSchemaRead])
 async def get_types(
         db: db_dependency,
-        page: int = Query(1, ge=1, description="Page number"),
-        page_size: int = Query(10, ge=1, le=100, description="Items per page"),
-        q: Optional[str] = Query(None, description="Search by name"),
 ):
-    total_result = await  db.execute(select(func.count()).select_from(Type))
-    total = total_result.scalar_one()
 
-    # calculate offset from page and page_size
-    offset = (page - 1) * page_size
-
-    # fetch paginated results
     result = await db.execute(
-        select(Type).offset(offset).limit(page_size)
+        select(Type)
     )
-    tasks = result.scalars().all()
+    types = result.scalars().all()
 
-    serializer = TypeSerializer(many=True)
-
-    return {
-        "data": {
-            "pagination": {
-                "total": total,
-                "page": page,
-                "size": page_size,
-                "pages": (total + page_size - 1) // page_size,  # total pages
-            },
-            "list": serializer.dump(tasks),
-        }
-    }
+    return types
 
 
 # ==========================
@@ -109,7 +92,8 @@ async def add_type(
 
         existing = await db.execute(select(Type).where(func.lower(Type.name) == name.lower()))
         if existing.scalar_one_or_none():
-            raise HTTPException(status_code=409, detail="Type with this name already exists")
+            raise HTTPException(
+                status_code=409, detail="Type with this name already exists")
 
         t = Type(name=name)
         db.add(t)
@@ -119,7 +103,8 @@ async def add_type(
 
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(status_code=409, detail="Type with this name already exists")
+        raise HTTPException(
+            status_code=409, detail="Type with this name already exists")
 
     except Exception as e:
         await db.rollback()
@@ -151,7 +136,8 @@ async def update_type(
                 .where(func.lower(Type.name) == new_name.lower(), Type.id != type_id)
             )
             if existing.scalar_one_or_none():
-                raise HTTPException(status_code=409, detail="Type with this name already exists")
+                raise HTTPException(
+                    status_code=409, detail="Type with this name already exists")
 
             t.name = new_name
 
@@ -161,7 +147,8 @@ async def update_type(
 
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(status_code=409, detail="Type with this name already exists")
+        raise HTTPException(
+            status_code=409, detail="Type with this name already exists")
 
     except Exception as e:
         await db.rollback()

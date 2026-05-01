@@ -18,11 +18,11 @@ from sqladmin import Admin
 
 from apps.product_manager.admin import (
     ItemAdmin,
-    CompanyAdmin,
     CategoryAdmin,
     UnitAdmin,
     TypeAdmin,
     TypeItemAdmin,
+    CarAdmin,
 )
 from apps.user.admin import UserAdmin
 from apps.customer.admin import CustomerAdmin, PaymentHistoryAdmin
@@ -37,17 +37,7 @@ from apps.document.admin import (
 from apps.permissions.admin import PermissionAdmin
 from apps.action.admin import ActionAdmin
 from apps.currency.admin import CurrencyAdmin
-from apps.computer.admin import (
-    ComputerAdmin,
-    RamAdmin,
-    RomAdmin,
-    ProcessorAdmin,
-    GenAdmin,
-    DisplayAdmin,
-    DSizeAdmin,
-    ResolutionAdmin,
-    RefreshRateAdmin,
-)
+
 from apps.initializer.admin import InitializerAdmin
 from apps.notes.admin import NoteAdmin
 
@@ -88,20 +78,11 @@ admin.add_view(PermissionAdmin)
 admin.add_view(ActionAdmin)
 admin.add_view(CurrencyAdmin)
 admin.add_view(ItemAdmin)
-admin.add_view(CompanyAdmin)
 admin.add_view(CategoryAdmin)
 admin.add_view(UnitAdmin)
 admin.add_view(TypeAdmin)
 admin.add_view(TypeItemAdmin)
-admin.add_view(ComputerAdmin)
-admin.add_view(RamAdmin)
-admin.add_view(RomAdmin)
-admin.add_view(ProcessorAdmin)
-admin.add_view(GenAdmin)
-admin.add_view(DisplayAdmin)
-admin.add_view(DSizeAdmin)
-admin.add_view(ResolutionAdmin)
-admin.add_view(RefreshRateAdmin)
+admin.add_view(CarAdmin)
 admin.add_view(InitializerAdmin)
 admin.add_view(NoteAdmin)
 

@@ -1,4 +1,5 @@
-from typing import Dict
+from sqlalchemy import func
+from typing import Dict, List
 
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy import select, delete, insert
@@ -13,13 +14,11 @@ from utils.pagination import pagination, PostPagination
 
 router = APIRouter(prefix="/items", tags=["Item Management"])
 
-from sqlalchemy import func
 
-
-@router.get("/", response_model=PostPagination[Dict])  # Using your generic wrapper
+# Using your generic wrapper
+@router.get("/", response_model=List[Dict])
 async def get_items(
         db: db_dependency,
-        pagination_param: dict = Depends(pagination)
 ):
     try:
         # 1. Base Query with Eager Loading
@@ -27,29 +26,18 @@ async def get_items(
             select(Item)
             .where(Item.is_deleted == False)
             .options(
+                # KEEP THESE (Relationships)
                 selectinload(Item.category),
                 selectinload(Item.unit),
-                selectinload(Item.company),
-                selectinload(Item.types)
+                selectinload(Item.car_rel),
+                selectinload(Item.types),
+
+
             )
             .order_by(Item.created_at.desc())
         )
 
-        # 2. Get Total Count (Crucial for frontend)
-        count_stmt = select(func.count()).select_from(base_query.subquery())
-        total_result = await db.execute(count_stmt)
-        total = total_result.scalar() or 0
-        pages = int(total / pagination_param['limit']) if total > pagination_param['limit'] else 1
-
-        # 3. Apply Pagination Math
-        # Use the 'skip' and 'limit' keys from your pagination dependency
-        paginated_query = (
-            base_query
-            .offset(pagination_param['skip'])
-            .limit(pagination_param['limit'])
-        )
-
-        result = await db.execute(paginated_query)
+        result = await db.execute(base_query)
         items = result.scalars().all()
         flattened_list = []
         for item in items:
@@ -63,6 +51,8 @@ async def get_items(
                 "unit": item.unit.value if item.unit else None,  # Safety check for None
                 "category": item.category.name if item.category else None,
                 "name": item.name,
+                "created_at": item.created_at if item.created_at else None,
+                "updated_at": item.updated_at if item.updated_at else None,
             }
 
             if item.types:
@@ -77,16 +67,11 @@ async def get_items(
                 flattened_list.append(row)
 
         # 4. Return in your PostPagination format
-        return {
-            "total": total,
-            "pages": pages,
-            "page": pagination_param['page'],
-            "size": pagination_param['limit'],
-            "items": flattened_list
-        }
+        return flattened_list
 
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to fetch items: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"Failed to fetch items: {str(e)}")
 
 
 @router.post("/add", status_code=status.HTTP_201_CREATED)
@@ -98,7 +83,8 @@ async def add_item(db: db_dependency, user: user_dependency, product_create: Ite
         res = await db.execute(query)
         product = res.scalar_one_or_none()
         if product:
-            raise HTTPException(status_code=400, detail="Product already exists with this barcode")
+            raise HTTPException(
+                status_code=400, detail="Product already exists with this barcode")
 
         product = Item(
             category_id=product_create.category_id,
@@ -218,8 +204,6 @@ async def delete_item(db: db_dependency, user: user_dependency, item_id: int):
             #         item.soft_delete()
             # else:
             item.soft_delete()
-
-
 
     except HTTPException:
         await db.rollback()

@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, HTTPException, status, Query
 
 from apps.document.models import DocumentItemBalance
@@ -9,7 +11,7 @@ from di.user import user_dependency
 from utils.get_pagination import Pagination
 
 from utils.response_type import *
-from .serializers.store_serializers import StoreSerializer
+from .serializers.store_serializers import StoreSchemaRead
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
@@ -19,31 +21,27 @@ router = APIRouter(
 )
 
 
-@router.get("/all", status_code=status.HTTP_200_OK)
+@router.get("", status_code=status.HTTP_200_OK, response_model=List[StoreSchemaRead])
 async def get_products_in_store(
         db: db_dependency,
         user: user_dependency,
-        page: int = Query(1, ge=1, description="Page number"),
-        page_size: int = Query(10, ge=1, le=100, description="Items per page"),
 ):
     try:
         query = (select(DocumentItemBalance)
                  .options(
             selectinload(DocumentItemBalance.item).options(
-                selectinload(Item.unit), selectinload(Item.category),
+                selectinload(Item.unit), selectinload(
+                    Item.category), selectinload(Item.unit),
                 selectinload(Item.document_item_balances)
             ),
             selectinload(DocumentItemBalance.currency),
             selectinload(DocumentItemBalance.document)
         )
         )
+        result = await db.execute(query)
+        products = result.scalars().all()
 
-        paginated_data = await Pagination.get_paginated_data(
-            db, DocumentItemBalance, StoreSerializer,
-            query, page, page_size
-        )
-
-        return paginated_data
+        return products
 
     except Exception as e:
         raise HTTPException(
@@ -51,7 +49,7 @@ async def get_products_in_store(
         )
 
 
-@router.get("/fetch")
+@router.get("/fetch", response_model=List[StoreSchemaRead], status_code=status.HTTP_200_OK)
 async def get_store(db: db_dependency, user: user_dependency):
     try:
         result = await db.execute(
@@ -66,9 +64,6 @@ async def get_store(db: db_dependency, user: user_dependency):
             )
         )
         products = result.scalars().unique().all()
-
-        serializer = StoreSerializer(many=True)
-        products = serializer.dump(products)
 
         return products
 

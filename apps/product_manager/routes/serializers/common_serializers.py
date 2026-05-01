@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.document.models import DocumentItemBalance
 from apps.base.schemas import BaseSchema
-from apps.product_manager.models import Category
+from apps.product_manager.models import Category, Car
 
 
 class CategorySerializer(BaseSchema):
@@ -23,6 +23,11 @@ class CategorySerializer(BaseSchema):
         items_count = len(
             [item for item in category.items if len(item.document_items) > 0]) or 0
         return items_count
+
+
+class CarRead(BaseModel):
+    id: int
+    name: str
 
 
 class ItemSerializer(Schema):

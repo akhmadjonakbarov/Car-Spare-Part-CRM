@@ -1,18 +1,30 @@
+from datetime import datetime
+
 from marshmallow import Schema, fields
-
+from pydantic import BaseModel, field_validator, field_validator
 from apps.product_manager.routes.serializers.common_serializers import ItemSerializer
+from apps.product_manager.schemas.product import ProductRead
+
+from typing import List, Optional
+from pydantic import BaseModel, ConfigDict
 
 
-class StoreSerializer(Schema):
-    id = fields.Int()
-    item = fields.Nested(ItemSerializer)
-    item_type = fields.Str(allow_none=True)
-    # currency = fields.Nested(CurrencySerializer)
-    currency_rate_value = fields.Float()
-    income_price = fields.Float()
-    sale_price = fields.Float()
-    sale_percentage = fields.Float()
-    qty = fields.Float()
-    # document = fields.Nested(DocumentSerializer)
-    created_at = fields.DateTime()
-    updated_at = fields.DateTime()
+class StoreSchemaRead(BaseModel):
+    id: int
+    item: ProductRead
+    item_type: str | None
+    currency_rate_value: float | None = 0.0  # Allows None if DB value is null
+    income_price: float
+    sale_price: float
+    sale_percentage: float
+    qty: float
+    created_at: datetime  # Automatically serializes datetime objects to strings
+    updated_at: datetime
+
+    @field_validator("currency_rate_value", mode="before")
+    @classmethod
+    def prevent_none(cls, v):
+        return v if v is not None else 0.0
+
+    # This allows Pydantic to read data from SQLAlchemy ORM models
+    model_config = ConfigDict(from_attributes=True)
