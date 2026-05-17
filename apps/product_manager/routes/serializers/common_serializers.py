@@ -33,20 +33,30 @@ class CarRead(BaseModel):
 class ItemSerializer(Schema):
     id = fields.Int()
     name = fields.Str()
+    car = fields.Method("get_car_name")
     barcode = fields.Str()
-    sale_price = fields.Float()
-    income_price = fields.Float()
-    currency_type = fields.Str()
     category = fields.Method("get_category_name")
+    sub_category = fields.Method("get_sub_category_name")
+    income_price = fields.Float()
+    sale_price = fields.Float()
     unit = fields.Method("get_unit_value")
+    currency_type = fields.Str()
     company = fields.Method("get_company_name")
     # currency_rate = fields.Method("get_currency_rate")
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
 
     @classmethod
+    def get_car_name(cls, obj):
+        return obj.car.name if obj.car else None
+
+    @classmethod
     def get_category_name(cls, obj):
         return obj.category.name if obj.category else None
+
+    @classmethod
+    def get_sub_category_name(cls, obj):
+        return obj.sub_category.name if obj.sub_category else None
 
     @classmethod
     def get_unit_value(cls, obj):

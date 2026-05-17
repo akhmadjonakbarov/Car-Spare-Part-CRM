@@ -28,6 +28,7 @@ async def get_items(
             .options(
                 # KEEP THESE (Relationships)
                 selectinload(Item.category),
+                selectinload(Item.sub_category),
                 selectinload(Item.unit),
                 selectinload(Item.car),
                 selectinload(Item.types),
@@ -42,14 +43,15 @@ async def get_items(
             # 1. Create the base data once per item
             base_product = {
                 "id": item.id,
-                "barcode": item.barcode,
-                "sale_price": item.sale_price,
-                "income_price": item.income_price,
-                "currency_type": item.currency_type,
-                "unit": item.unit.value if item.unit else None,  # Safety check for None
-                "category": item.category.name if item.category else None,
                 "name": item.name,
                 "car": item.car.name if item.car else None,
+                "barcode": item.barcode,
+                "category": item.category.name if item.category else None,
+                "sub_category": item.sub_category.name if item.sub_category else None,
+                "income_price": item.income_price,
+                "sale_price": item.sale_price,
+                "unit": item.unit.value if item.unit else None,
+                "currency_type": item.currency_type,
                 "created_at": item.created_at if item.created_at else None,
                 "updated_at": item.updated_at if item.updated_at else None,
             }
@@ -57,12 +59,12 @@ async def get_items(
             if item.types:
                 for tp in item.types:
                     row = base_product.copy()
-                    row["type"] = tp.name
+                    row["item_type"] = tp.name
                     flattened_list.append(row)
             else:
 
                 row = base_product.copy()
-                row["type"] = None
+                row["item_type"] = None
                 flattened_list.append(row)
 
         # 4. Return in your PostPagination format
@@ -86,12 +88,14 @@ async def add_item(db: db_dependency, user: user_dependency, product_create: Ite
                 status_code=400, detail="Product already exists with this barcode")
 
         product = Item(
-            category_id=product_create.category_id,
-            unit_id=product_create.unit_id,
             name=product_create.name,
+            car_id=product_create.car_id,
             barcode=product_create.barcode,
-            sale_price=product_create.sale_price,
+            category_id=product_create.category_id,
+            sub_category_id=product_create.sub_category_id,
             income_price=product_create.income_price,
+            sale_price=product_create.sale_price,
+            unit_id=product_create.unit_id,
             currency_type=product_create.currency_type,
             user_id=user.get("id")
         )
@@ -134,13 +138,15 @@ async def update_item(db: db_dependency, user: user_dependency, item_id: int, it
         if not item:
             raise HTTPException(status_code=404, detail="Item not found")
 
-        item.category_id = item_body.category_id
-        item.unit_id = item_body.unit_id
         item.name = item_body.name
+        item.car_id = item_body.car_id
         item.barcode = item_body.barcode
-        item.currency_type = item_body.currency_type
-        item.sale_price = item_body.sale_price
+        item.category_id = item_body.category_id
+        item.sub_category_id = item_body.sub_category_id
         item.income_price = item_body.income_price
+        item.sale_price = item_body.sale_price
+        item.unit_id = item_body.unit_id
+        item.currency_type = item_body.currency_type
 
         res = await db.execute(select(Type).where(Type.id.in_(item_body.type_ids)))
         types = res.scalars().all()
@@ -161,6 +167,7 @@ async def update_item(db: db_dependency, user: user_dependency, item_id: int, it
         final_query = await db.execute(
             select(Item).options(
                 selectinload(Item.category),
+                selectinload(Item.sub_category),
                 selectinload(Item.unit),
                 selectinload(Item.company),
                 selectinload(Item.types)

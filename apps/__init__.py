@@ -1,7 +1,7 @@
 from .user.models import User
 from .role_manager.models import Role, Employee, SalaryType
 from .product_manager.models import (
-  Category, Unit, Item, Type, TypeItem
+  Category, SubCategory, Unit, Item, Type, TypeItem
 )
 from .document.models import (
     Document,
@@ -23,7 +23,7 @@ __all__ = [
     "User", "Role", "Employee",
     "SalaryType", "Currency", "Document",
     "DocumentItem", "DocumentItemBalance", 
-    "Category", "Unit", "Permission",
+    "Category", "SubCategory", "Unit", "Permission",
     "Action", "Item", "Note", "Type", "TypeItem",
     "Customer",  "Purchase", "Transaction", "Company"
 ]

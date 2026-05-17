@@ -23,6 +23,21 @@ class Category(BaseName):
 
     # relationships
     items = relationship('Item', back_populates='category')
+    sub_categories = relationship('SubCategory', back_populates='category')
+
+
+class SubCategory(BaseName):
+    __tablename__ = 'sub_categories'
+
+    category_id: Mapped[int] = mapped_column(
+        ForeignKey('categories.id'), nullable=False)
+    category: Mapped["Category"] = relationship(
+        back_populates="sub_categories",
+        lazy="selectin")
+    items = relationship('Item', back_populates='sub_category')
+
+    def __str__(self):
+        return f"{self.category.name} - {self.name}"
 
 
 class Unit(Base):
@@ -47,24 +62,28 @@ class Item(BaseName):
     currency_type: Mapped[str] = mapped_column(String, default="uzs")
 
     # Foreign Keys
+    car_id: Mapped[int] = mapped_column(
+        ForeignKey('cars.id'), nullable=True)
     category_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey('categories.id'))
+    sub_category_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey('sub_categories.id'))
     unit_id: Mapped[Optional[int]] = mapped_column(ForeignKey('units.id'))
 
     user_id: Mapped[int] = mapped_column(
         ForeignKey('users.id'), nullable=False)
-    car_id: Mapped[int] = mapped_column(
-        ForeignKey('cars.id'), nullable=True)
     company_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey('companies.id'))
 
     # Relationships - Mapped[List[...]] tells your IDE exactly what to expect
-    category: Mapped["Category"] = relationship(back_populates="items")
-    unit: Mapped["Unit"] = relationship(back_populates="items")
-    user: Mapped["User"] = relationship(back_populates="items")
     car: Mapped["Car"] = relationship(
         back_populates="items",
     )
+    category: Mapped["Category"] = relationship(back_populates="items")
+    sub_category: Mapped[Optional["SubCategory"]
+                         ] = relationship(back_populates="items")
+    unit: Mapped["Unit"] = relationship(back_populates="items")
+    user: Mapped["User"] = relationship(back_populates="items")
     company: Mapped[Optional["Company"]] = relationship(back_populates="items")
 
     # Many-to-Many Relationship

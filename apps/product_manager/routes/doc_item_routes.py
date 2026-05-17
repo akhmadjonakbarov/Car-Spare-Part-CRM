@@ -1,9 +1,12 @@
+from typing import List
+
 from fastapi import APIRouter, HTTPException, Path, Query
 from starlette import status
 from sqlalchemy import select, func, update
 from sqlalchemy.orm import selectinload
 
 from apps.document.models import DocumentItem, Document, DocumentItemBalance
+from apps.document.schemas import DocumentItemRead
 from apps.product_manager.models import Item
 from di.db import db_dependency
 from di.user import user_dependency
@@ -17,16 +20,21 @@ router = APIRouter(
 )
 
 
-@router.get("/all", status_code=status.HTTP_200_OK)
+@router.get("/all", status_code=status.HTTP_200_OK, response_model=List[DocumentItemRead])
 async def get_products(
         db: db_dependency, user: user_dependency, document_id: int | None = None,
         # page: int = Query(1, ge=1, description="Page number"),
         # page_size: int = Query(10, ge=1, le=100, description="Items per page"),
 ):
-    serializer = DocumentItemSerializer(many=True)
 
     query = select(DocumentItem).where(DocumentItem.is_deleted == False).options(
-        selectinload(DocumentItem.item).selectinload(Item.unit), selectinload(DocumentItem.currency),
+        selectinload(DocumentItem.item).options(
+            selectinload(Item.unit),
+            selectinload(Item.category),
+            selectinload(Item.sub_category),
+            selectinload(Item.car),
+        ),
+        selectinload(DocumentItem.currency),
     )
 
     if document_id is not None:
@@ -35,14 +43,15 @@ async def get_products(
     result = await db.execute(query)
     doc_items = result.scalars().all()
 
-    return serializer.dump(doc_items)
+    return doc_items
 
 
 @router.delete("/delete/{doc_item_id}", status_code=status.HTTP_200_OK)
 async def delete_product(
         db: db_dependency,
         user: user_dependency,
-        doc_item_id: int = Path(..., description="ID of the document item to delete"),
+        doc_item_id: int = Path(...,
+                                description="ID of the document item to delete"),
 ):
     try:
         # 1. Use join or specific select to ensure doc_item isn't already soft-deleted
@@ -53,7 +62,8 @@ async def delete_product(
         doc_item = result.scalar_one_or_none()
 
         if not doc_item:
-            raise HTTPException(status_code=404, detail="Item not found or already deleted")
+            raise HTTPException(
+                status_code=404, detail="Item not found or already deleted")
 
         # 2. Atomic Balance Restore (Prevents Race Conditions)
         balance_result = await db.execute(
@@ -68,7 +78,8 @@ async def delete_product(
 
         if balance_result.rowcount == 0:
             # Handle case where balance record was missing
-            raise HTTPException(status_code=404, detail="Balance record missing")
+            raise HTTPException(
+                status_code=404, detail="Balance record missing")
 
         # 3. Handle Document Cleanup
         # Fetch document and items count in one go
@@ -86,7 +97,8 @@ async def delete_product(
             purchase_result = await db.execute(select(Purchase).where(Purchase.document_id == document.id))
             purchase = purchase_result.scalar_one_or_none()
             if purchase:
-                await db.delete(purchase)  # Using standard delete if hard_delete isn't a custom method
+                # Using standard delete if hard_delete isn't a custom method
+                await db.delete(purchase)
             document.soft_delete()
 
         # 4. Finalize

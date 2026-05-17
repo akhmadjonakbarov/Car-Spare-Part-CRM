@@ -1,4 +1,7 @@
 from marshmallow import fields, Schema
+from pydantic import BaseModel
+
+from apps.product_manager.schemas.product import ProductRead
 # from apps.currency.routes.serializers import CurrencySerializer
 
 
@@ -24,3 +27,14 @@ class DocumentItemSerializer(Schema):
     selling_percentage = fields.Float()
     income_price = fields.Float()
     qty = fields.Float()
+
+
+class DocumenItemRead(BaseModel):
+    id: int
+    item: ProductRead
+    item_type: str | None
+    # currency: CurrencySerializer | None
+    sale_price: float
+    selling_percentage: float
+    income_price: float
+    qty: float

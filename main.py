@@ -19,6 +19,7 @@ from sqladmin import Admin
 from apps.product_manager.admin import (
     ItemAdmin,
     CategoryAdmin,
+    SubCategoryAdmin,
     UnitAdmin,
     TypeAdmin,
     TypeItemAdmin,
@@ -87,6 +88,7 @@ admin.add_view(CarAdmin)
 admin.add_view(InitializerAdmin)
 admin.add_view(NoteAdmin)
 admin.add_view(CompanyAdmin)
+admin.add_view(SubCategoryAdmin)
 
 app.mount(
     "/statistics", StaticFiles(directory="ds_files/statistics"), name="statistics"

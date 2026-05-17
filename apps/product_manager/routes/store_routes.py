@@ -30,8 +30,10 @@ async def get_products_in_store(
         query = (select(DocumentItemBalance)
                  .options(
             selectinload(DocumentItemBalance.item).options(
-                selectinload(Item.unit), selectinload(
-                    Item.category), selectinload(Item.unit), selectinload(Item.car),
+                selectinload(Item.unit),
+                selectinload(Item.category),
+                selectinload(Item.sub_category),
+                selectinload(Item.car),
                 selectinload(Item.document_item_balances)
             ),
             selectinload(DocumentItemBalance.currency),
@@ -56,8 +58,10 @@ async def get_store(db: db_dependency, user: user_dependency):
             select(DocumentItemBalance)
             .options(
                 selectinload(DocumentItemBalance.item).options(
-                    selectinload(Item.unit), selectinload(
-                        Item.category), selectinload(Item.car),
+                    selectinload(Item.unit),
+                    selectinload(Item.category),
+                    selectinload(Item.sub_category),
+                    selectinload(Item.car),
                     selectinload(Item.document_item_balances)
                 ),
                 selectinload(DocumentItemBalance.currency),

@@ -18,10 +18,17 @@ class Document(Base):
     user = relationship('User', back_populates='documents')
 
     # back_populates
-    document_items = relationship('DocumentItem', back_populates='document')
-    document_item_balances = relationship(
-        'DocumentItemBalance', back_populates='document', )
+    document_items = relationship(
+        'DocumentItem',
+        back_populates='document',
+        cascade='all, delete-orphan'
+    )
 
+    document_item_balances = relationship(
+        'DocumentItemBalance',
+        back_populates='document',
+        cascade='all, delete-orphan'
+    )
     purchase = relationship(
         'Purchase', back_populates='document', uselist=False)
 

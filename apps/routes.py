@@ -10,6 +10,7 @@ from apps.product_manager.routes import (
     doc_item_routes,
     type_routes,
     car_routes,
+    sub_category_routes,
 )
 from apps.permissions import routes as permissions_routes
 from apps.action import routes as action_routes
@@ -44,3 +45,4 @@ main_router.include_router(statistics_routes.router)
 main_router.include_router(notes_routes.router)
 main_router.include_router(car_routes.router)
 main_router.include_router(company_routes.router)
+main_router.include_router(sub_category_routes.router)

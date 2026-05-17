@@ -33,6 +33,7 @@ async def get_purchases(
                 .selectinload(DocumentItem.item)
                 .options(
                     selectinload(Item.category),
+                    selectinload(Item.sub_category),
                     selectinload(Item.unit),
                     selectinload(Item.car),
                 ),
@@ -77,6 +78,7 @@ async def customer_purchases(
                 .selectinload(DocumentItem.item).options(
                     selectinload(Item.unit),
                     selectinload(Item.category),
+                    selectinload(Item.sub_category),
                     selectinload(Item.car)
                 )
 

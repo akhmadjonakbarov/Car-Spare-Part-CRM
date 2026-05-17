@@ -1,17 +1,20 @@
 from sqladmin import ModelView
-from .models import Item, Category, Unit, Type, TypeItem, Car
+from .models import Item, Category, SubCategory, Unit, Type, TypeItem, Car
 
 
 class ItemAdmin(ModelView, model=Item):
     column_list = [
         Item.id,
         Item.name,
-        Item.barcode,
         "car.name",
-        "types",
+        Item.barcode,
+        "category.name",
+        "sub_category.name",
         Item.income_price,
         Item.sale_price,
+        Item.unit,
         Item.currency_type,
+        "types",
     ]
     column_searchable_list = [Item.name, Item.barcode]
     name = "Item"
@@ -52,3 +55,10 @@ class CarAdmin(ModelView, model=Car):
     column_searchable_list = [Car.name]
     name = "Car"
     icon = "fa-solid fa-car"
+
+
+class SubCategoryAdmin(ModelView, model=SubCategory):
+    column_list = [SubCategory.id, SubCategory.name, SubCategory.category_id]
+    column_searchable_list = [SubCategory.name]
+    name = "Sub Category"
+    icon = "fa-solid fa-tag"

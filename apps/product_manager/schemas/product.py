@@ -16,14 +16,14 @@ class TypeRead(BaseModelSchema):
 class ProductRead(BaseModel):
     id: int
     name: str
+    car: str
+    barcode: str
+    category: str
+    sub_category: str | None = None
     income_price: float
     sale_price: float
-    barcode: str
-    currency_type: str
-    category: str
     unit: str
-    car: str
-    # Fixed: Match the Pydantic field name to your logic or the DB attribute
+    currency_type: str
     item_type: str | None = None
 
     # 1. Fix the Unit object -> string error
@@ -41,8 +41,15 @@ class ProductRead(BaseModel):
         if hasattr(v, 'name'):  # If it's the Category object, get the .name
             return v.name
         return str(v)
-    # 3. Fix the Car object -> string error
 
+    @field_validator('sub_category', mode='before')
+    @classmethod
+    def transform_sub_category(cls, v):
+        if hasattr(v, 'name'):
+            return v.name
+        return str(v) if v else None
+
+    # 3. Fix the Car object -> string error
     @field_validator('car', mode='before')
     @classmethod
     def transform_car_rel(cls, v):
@@ -54,12 +61,12 @@ class ProductRead(BaseModel):
 class ProductCreatedRes(BaseModel):
     id: int
     name: str
+    barcode: str
+    category: str
     income_price: float
     sale_price: float
-    barcode: str
-    currency_type: str
-    category: str
     unit: str
+    currency_type: str
 
     # Fixed: Match the Pydantic field name to your logic or the DB attribute
 

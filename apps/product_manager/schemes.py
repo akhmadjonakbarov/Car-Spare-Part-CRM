@@ -7,23 +7,27 @@ from pydantic import BaseModel, Field
 
 class ItemCreateScheme(BaseModel):
     name: str = Field()
+    car_id: Optional[int] = Field(default=None)
     barcode: str = Field()
-    sale_price: float = Field(default=0.0)
-    income_price: float = Field(default=0.0)
-    currency_type: str = Field(default="uzs")
     category_id: int = Field(gt=0)
+    sub_category_id: Optional[int] = Field(default=None)
+    income_price: float = Field(default=0.0)
+    sale_price: float = Field(default=0.0)
     unit_id: int = Field(gt=0)
+    currency_type: str = Field(default="uzs")
     type_ids: Optional[List[int]] = Field(None)
 
 
 class ItemUpdateScheme(BaseModel):
     name: Optional[str] = Field(default=None, min_length=2)
+    car_id: Optional[int] = Field(default=None)
     barcode: Optional[str] = Field(default=None, min_length=2)
-    sale_price: Optional[float] = Field(default=None)
-    income_price: Optional[float] = Field(default=None)
-    currency_type: Optional[str] = Field(default=None)
     category_id: int = Field(gt=0)
+    sub_category_id: Optional[int] = Field(default=None)
+    income_price: Optional[float] = Field(default=None)
+    sale_price: Optional[float] = Field(default=None)
     unit_id: int = Field(gt=0)
+    currency_type: Optional[str] = Field(default=None)
     type_ids: List[int] = Field(None)
 
 
@@ -41,6 +45,11 @@ class CarScheme(BaseModel):
 
 class CategoryScheme(BaseModel):
     name: str = Field(min_length=4)
+
+
+class SubCategoryScheme(BaseModel):
+    name: str = Field(min_length=2)
+    category_id: int = Field(gt=0)
 
 
 # Schema for the Currency object
