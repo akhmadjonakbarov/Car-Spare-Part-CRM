@@ -22,12 +22,18 @@ class User(Base):
     currencies = relationship('Currency', back_populates='user')
     documents = relationship('Document', back_populates='user')
     document_items = relationship('DocumentItem', back_populates='user')
-    document_item_balances = relationship('DocumentItemBalance', back_populates='user')
+    document_item_balances = relationship(
+        'DocumentItemBalance', back_populates='user')
     customers = relationship('Customer', back_populates='user')
-    roles = relationship('Role', secondary="users_roles", back_populates='users')
+    roles = relationship('Role', secondary="users_roles",
+                         back_populates='users')
 
     @validates('phone_number', 'phone_number2')
     def validate_phone_number(self, key, value):
         if value and not re.match(r'^\+?\d{9,15}$', value):
-            raise ValueError('Invalid phone number format. Expected format: 901234567.')
+            raise ValueError(
+                'Invalid phone number format. Expected format: 901234567.')
         return value
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"

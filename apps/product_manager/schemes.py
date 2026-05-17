@@ -3,6 +3,8 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
+
+
 class ItemCreateScheme(BaseModel):
     name: str = Field()
     barcode: str = Field()

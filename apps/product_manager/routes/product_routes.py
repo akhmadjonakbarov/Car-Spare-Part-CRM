@@ -29,10 +29,8 @@ async def get_items(
                 # KEEP THESE (Relationships)
                 selectinload(Item.category),
                 selectinload(Item.unit),
-                selectinload(Item.car_rel),
+                selectinload(Item.car),
                 selectinload(Item.types),
-
-
             )
             .order_by(Item.created_at.desc())
         )
@@ -51,6 +49,7 @@ async def get_items(
                 "unit": item.unit.value if item.unit else None,  # Safety check for None
                 "category": item.category.name if item.category else None,
                 "name": item.name,
+                "car": item.car.name if item.car else None,
                 "created_at": item.created_at if item.created_at else None,
                 "updated_at": item.updated_at if item.updated_at else None,
             }

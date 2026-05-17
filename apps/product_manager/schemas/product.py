@@ -22,6 +22,7 @@ class ProductRead(BaseModel):
     currency_type: str
     category: str
     unit: str
+    car: str
     # Fixed: Match the Pydantic field name to your logic or the DB attribute
     item_type: str | None = None
 
@@ -38,6 +39,14 @@ class ProductRead(BaseModel):
     @classmethod
     def transform_category(cls, v):
         if hasattr(v, 'name'):  # If it's the Category object, get the .name
+            return v.name
+        return str(v)
+    # 3. Fix the Car object -> string error
+
+    @field_validator('car', mode='before')
+    @classmethod
+    def transform_car_rel(cls, v):
+        if hasattr(v, 'name'):  # If it's the Car object, get the .name
             return v.name
         return str(v)
 

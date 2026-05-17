@@ -12,11 +12,9 @@ class BaseName(Base):
         return self.name
 
 
-
-
 class Car(BaseName):
     __tablename__ = 'cars'
-    items = relationship('Item', back_populates='car_rel')
+    items = relationship('Item', back_populates='car')
 
 
 class Category(BaseName):
@@ -32,6 +30,9 @@ class Unit(Base):
 
     # relationships
     items = relationship('Item', back_populates='unit')
+
+    def __str__(self):
+        return self.value
 
 
 class Item(BaseName):
@@ -58,7 +59,7 @@ class Item(BaseName):
     category: Mapped["Category"] = relationship(back_populates="items")
     unit: Mapped["Unit"] = relationship(back_populates="items")
     user: Mapped["User"] = relationship(back_populates="items")
-    car_rel: Mapped[Optional["Car"]] = relationship(
+    car: Mapped["Car"] = relationship(
         back_populates="items",
     )
 

@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from apps.base.models import Base, BaseDocumentItem
 from sqlalchemy import (
     Column, Integer, String,
-    ForeignKey, Float, Numeric, Table
+    ForeignKey,  Numeric,
 )
 
 
@@ -20,7 +20,7 @@ class Document(Base):
     # back_populates
     document_items = relationship('DocumentItem', back_populates='document')
     document_item_balances = relationship(
-        'DocumentItemBalance', back_populates='document')
+        'DocumentItemBalance', back_populates='document', )
 
     purchase = relationship(
         'Purchase', back_populates='document', uselist=False)

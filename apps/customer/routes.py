@@ -114,11 +114,6 @@ async def update_customer(
         # 3. Commit the changes
         await db.commit()
 
-        # 4. Use 'refresh' ONLY if you need DB-generated defaults.
-        # But refresh clears relationships! So we use the already loaded 'customer'
-        # or we refresh and then re-load. To be safe in async:
-
-        # Re-query one last time to ensure we have the UPDATED data AND the relationships loaded
         result = await db.execute(query)
         customer = result.scalar_one()
 
@@ -190,7 +185,9 @@ async def add_payment_history(db: db_dependency, payment_history_body: PaymentHi
         payment_history = PaymentHistory(**payment_history_body.model_dump())
         db.add(payment_history)
         await db.commit()
-        return res_message(message="Payment was added")
+        return {
+            "message": "Payment was added"
+        }
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
@@ -207,7 +204,9 @@ async def delete_payment_history(db: db_dependency, history_id: int):
 
         payment_history.soft_delete()
         await db.commit()
-        return res_message(message="PaymentHistory was deleted")
+        return {
+            "message": "PaymentHistory was deleted"
+        }
     except HTTPException:
         raise
     except Exception as e:

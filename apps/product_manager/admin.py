@@ -7,6 +7,8 @@ class ItemAdmin(ModelView, model=Item):
         Item.id,
         Item.name,
         Item.barcode,
+        "car.name",
+        "types",
         Item.income_price,
         Item.sale_price,
         Item.currency_type,

@@ -24,11 +24,7 @@ router = APIRouter(
 )
 async def get_purchases(
         db: db_dependency,
-        # pagination_param: dict = Depends(pagination),
 ):
-    """
-    Fetch all non-deleted purchases.
-    """
     try:
         base_query = (
             select(Purchase).where(Purchase.is_deleted == False).options(
@@ -38,28 +34,17 @@ async def get_purchases(
                 .options(
                     selectinload(Item.category),
                     selectinload(Item.unit),
-                ),  # Assuming unit is a relationship
+                    selectinload(Item.car),
+                ),
                 selectinload(Purchase.document)
                 .selectinload(Document.document_items)
                 .selectinload(DocumentItem.currency)
             ).order_by(desc(Purchase.created_at))
         )
-        # # TODO: relearn select_from and subquery
-        # count_query = select(func.count()).select_from(base_query.subquery())
-        # total_result = await db.execute(count_query)
-        # total = total_result.scalar() or 0
-        #
-        # # 3. Paginations
-        #
-        # paginated_query = base_query.offset(pagination_param['skip']).limit(pagination_param['limit'])
         result = await db.execute(base_query)
         purchases = result.scalars().all()
 
         return purchases
-
-        # return Response(total, pagination_param['page'], pagination_param['limit'], purchases).paginated_response()
-
-
 
     except Exception as e:
         print(e)
@@ -91,7 +76,8 @@ async def customer_purchases(
                 .selectinload(Document.document_items)
                 .selectinload(DocumentItem.item).options(
                     selectinload(Item.unit),
-                    selectinload(Item.category)
+                    selectinload(Item.category),
+                    selectinload(Item.car)
                 )
 
             )
@@ -145,17 +131,21 @@ async def pay_purchase(
 
             purchase.pay()
         else:
-            raise HTTPException(status_code=400, detail="Purchase model missing `pay()` method")
+            raise HTTPException(
+                status_code=400, detail="Purchase model missing `pay()` method")
 
         db.add(purchase)
         await db.commit()
         await db.refresh(purchase)
 
-        return res_message(f"Payment completed successfully for purchase ID {purchase.id}")
+        return {
+            "message": f"Payment completed successfully for purchase ID {purchase.id}"
+        }
 
     except IntegrityError as e:
         await db.rollback()
-        raise HTTPException(status_code=409, detail=f"Database integrity error: {str(e)}")
+        raise HTTPException(
+            status_code=409, detail=f"Database integrity error: {str(e)}")
 
     except HTTPException:
         await db.rollback()
