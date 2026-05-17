@@ -4,9 +4,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from apps.base.models import Base
 from apps.company.models import Company
 
+
 class BaseName(Base):
     __abstract__ = True
-    name = Column(String(100), unique=True)
+    name = Column(String(100))
 
     def __str__(self):
         return self.name

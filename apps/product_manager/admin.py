@@ -16,6 +16,8 @@ class ItemAdmin(ModelView, model=Item):
     column_searchable_list = [Item.name, Item.barcode]
     name = "Item"
     icon = "fa-solid fa-box"
+    # Sort by ID in descending order to show newest items first
+    column_default_sort = [(Item.id, True)]  # True means DESC (descending)
 
 
 class CategoryAdmin(ModelView, model=Category):
