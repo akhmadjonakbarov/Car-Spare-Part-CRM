@@ -19,6 +19,7 @@ from apps.user import routes as user_routes
 from apps.purchase import routes as purchase_routes
 from apps.customer import routes as customer_routes
 from apps.transaction import routes as transaction_routes
+from apps.company import routes as company_routes
 from config.settings import settings
 
 main_router = APIRouter(
@@ -42,3 +43,4 @@ main_router.include_router(currency_routes.router)
 main_router.include_router(statistics_routes.router)
 main_router.include_router(notes_routes.router)
 main_router.include_router(car_routes.router)
+main_router.include_router(company_routes.router)

@@ -2,7 +2,7 @@ from typing import List, Optional
 from sqlalchemy import String, Float, ForeignKey, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from apps.base.models import Base
-
+from apps.company.models import Company
 
 class BaseName(Base):
     __abstract__ = True
@@ -54,6 +54,8 @@ class Item(BaseName):
         ForeignKey('users.id'), nullable=False)
     car_id: Mapped[int] = mapped_column(
         ForeignKey('cars.id'), nullable=True)
+    company_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey('companies.id'))
 
     # Relationships - Mapped[List[...]] tells your IDE exactly what to expect
     category: Mapped["Category"] = relationship(back_populates="items")
@@ -62,6 +64,7 @@ class Item(BaseName):
     car: Mapped["Car"] = relationship(
         back_populates="items",
     )
+    company: Mapped[Optional["Company"]] = relationship(back_populates="items")
 
     # Many-to-Many Relationship
     # Note: Use the association table name 'type_items' defined below

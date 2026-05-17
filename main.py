@@ -37,6 +37,7 @@ from apps.document.admin import (
 from apps.permissions.admin import PermissionAdmin
 from apps.action.admin import ActionAdmin
 from apps.currency.admin import CurrencyAdmin
+from apps.company.admin import CompanyAdmin
 
 from apps.initializer.admin import InitializerAdmin
 from apps.notes.admin import NoteAdmin
@@ -85,6 +86,7 @@ admin.add_view(TypeItemAdmin)
 admin.add_view(CarAdmin)
 admin.add_view(InitializerAdmin)
 admin.add_view(NoteAdmin)
+admin.add_view(CompanyAdmin)
 
 app.mount(
     "/statistics", StaticFiles(directory="ds_files/statistics"), name="statistics"

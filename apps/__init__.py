@@ -16,6 +16,7 @@ from .customer.models import Customer
 from .action.models import Action
 from .notes.models import Note
 from .transaction.models import Transaction
+from .company.models import Company
 
 __all__ = [
     "Initializer",
@@ -24,5 +25,5 @@ __all__ = [
     "DocumentItem", "DocumentItemBalance", 
     "Category", "Unit", "Permission",
     "Action", "Item", "Note", "Type", "TypeItem",
-    "Customer",  "Purchase", "Transaction"
+    "Customer",  "Purchase", "Transaction", "Company"
 ]
