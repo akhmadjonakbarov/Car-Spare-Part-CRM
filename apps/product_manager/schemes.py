@@ -6,15 +6,16 @@ from pydantic import BaseModel, Field
 
 
 class ItemCreateScheme(BaseModel):
-    name: str = Field()
+    name: Optional[str] = Field(default=None)
     car_id: Optional[int] = Field(default=None)
-    barcode: str = Field()
+    barcode: Optional[str] = Field(default=None)
     category_id: int = Field(gt=0)
     sub_category_id: Optional[int] = Field(default=None)
     income_price: float = Field(default=0.0)
     sale_price: float = Field(default=0.0)
     unit_id: int = Field(gt=0)
     currency_type: str = Field(default="uzs")
+    company_id: Optional[int] = Field(default=None)
     type_ids: Optional[List[int]] = Field(None)
 
 

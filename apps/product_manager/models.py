@@ -1,3 +1,4 @@
+import re
 from typing import List, Optional
 from sqlalchemy import String, Float, ForeignKey, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -10,7 +11,7 @@ class BaseName(Base):
     name = Column(String(100))
 
     def __str__(self):
-        return self.name
+        return self.name or ""
 
 
 class Car(BaseName):
@@ -37,7 +38,7 @@ class SubCategory(BaseName):
     items = relationship('Item', back_populates='sub_category')
 
     def __str__(self):
-        return f"{self.category.name} - {self.name}"
+        return f"{self.category.name} - {self.name}" if self.category else (self.name or "")
 
 
 class Unit(Base):
@@ -48,15 +49,46 @@ class Unit(Base):
     items = relationship('Item', back_populates='unit')
 
     def __str__(self):
-        return self.value
+        return self.value or ""
 
 
 class Item(BaseName):
     __tablename__ = 'items'
 
+    @staticmethod
+    def _clean_name(name: Optional[str]) -> str:
+        if not name:
+            return ""
+        return re.sub(r'[^a-zA-Z0-9\u0400-\u04FF]', '', str(name))
+
+    @staticmethod
+    def generate_name(
+        category_name: Optional[str] = None,
+        sub_category_name: Optional[str] = None,
+        company_name: Optional[str] = None,
+    ) -> str:
+        parts = [p for p in [category_name, sub_category_name, company_name] if p]
+        return " ".join(parts) if parts else ""
+
+    @staticmethod
+    def generate_barcode(
+        category_name: Optional[str] = None,
+        sub_category_name: Optional[str] = None,
+        car_name: Optional[str] = None,
+        type_name: Optional[str] = None,
+        company_name: Optional[str] = None,
+    ) -> str:
+        parts = []
+        for name in [category_name, sub_category_name, car_name, type_name, company_name]:
+            if name:
+                cleaned = Item._clean_name(name)
+                if cleaned:
+                    parts.append(cleaned)
+        return "-".join(parts) if parts else ""
+
     # Use mapped_column for better type hinting
     barcode: Mapped[str] = mapped_column(
-        String(100), nullable=False, unique=True)
+        String(100), nullable=True, unique=True)
     income_price: Mapped[float] = mapped_column(Float, default=0.0)
     sale_price: Mapped[float] = mapped_column(Float, default=0.0)
     currency_type: Mapped[str] = mapped_column(String, default="uzs")

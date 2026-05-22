@@ -5,7 +5,8 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy import select, delete, insert
 from sqlalchemy.orm import selectinload
 
-from apps.product_manager.models import Item, Type, TypeItem
+from apps.product_manager.models import Item, Type, TypeItem, Car, Category, SubCategory
+from apps.company.models import Company
 from apps.product_manager.schemas.product import ProductRead
 from apps.product_manager.schemes import ItemCreateScheme, ItemUpdateScheme
 from di.db import db_dependency
@@ -78,9 +79,34 @@ async def get_items(
 @router.post("/add", status_code=status.HTTP_201_CREATED)
 async def add_item(db: db_dependency, user: user_dependency, product_create: ItemCreateScheme):
     try:
-        query = (
-            select(Item).where(Item.barcode == product_create.barcode)
+        car = await db.get(Car, product_create.car_id) if product_create.car_id else None
+        category = await db.get(Category, product_create.category_id)
+        sub_category = await db.get(SubCategory, product_create.sub_category_id) if product_create.sub_category_id else None
+        company = await db.get(Company, product_create.company_id) if product_create.company_id else None
+
+        type_name = None
+        if product_create.type_ids:
+            types_select_query = select(Type).where(Type.id.in_(product_create.type_ids))
+            type_res = await db.execute(types_select_query)
+            types = type_res.scalars().all()
+            if types:
+                type_name = types[0].name
+
+        name = product_create.name or Item.generate_name(
+            category_name=category.name if category else None,
+            sub_category_name=sub_category.name if sub_category else None,
+            company_name=company.name if company else None,
         )
+
+        barcode = product_create.barcode or Item.generate_barcode(
+            category_name=category.name if category else None,
+            sub_category_name=sub_category.name if sub_category else None,
+            car_name=car.name if car else None,
+            type_name=type_name,
+            company_name=company.name if company else None,
+        )
+
+        query = select(Item).where(Item.barcode == barcode)
         res = await db.execute(query)
         product = res.scalar_one_or_none()
         if product:
@@ -88,26 +114,22 @@ async def add_item(db: db_dependency, user: user_dependency, product_create: Ite
                 status_code=400, detail="Product already exists with this barcode")
 
         product = Item(
-            name=product_create.name,
+            name=name,
             car_id=product_create.car_id,
-            barcode=product_create.barcode,
+            barcode=barcode,
             category_id=product_create.category_id,
             sub_category_id=product_create.sub_category_id,
             income_price=product_create.income_price,
             sale_price=product_create.sale_price,
             unit_id=product_create.unit_id,
             currency_type=product_create.currency_type,
+            company_id=product_create.company_id,
             user_id=user.get("id")
         )
         db.add(product)
         await db.flush()
         if product_create.type_ids:
-            types_select_query = (
-                select(Type).where(Type.id.in_(product_create.type_ids))
-            )
-            type_res = await db.execute(types_select_query)
-            res = type_res.scalars().all()
-            for i in res:
+            for i in types:
                 type_item = TypeItem(
                     type_id=i.id,
                     item_id=product.id

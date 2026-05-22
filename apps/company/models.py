@@ -11,7 +11,7 @@ class Company(Base):
     items = relationship('Item', back_populates='company')
 
     def __str__(self):
-        return self.name
+        return self.name or ""
 
     def __repr__(self):
         return f"<Company(id={self.id}, name={self.name})>"
